@@ -1,0 +1,729 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define maxstack 10
+#define MAX_VERTICES 10000
+
+struct room {
+    int room_no;
+    int room_status;
+    char guest_name[10];
+    char phone_no[10];
+    int stay_time;
+    int total_luggage;
+    int stack[maxstack];
+    int top;
+    struct room *next;
+    struct room *prev;
+};
+
+struct emp {
+    char name[20];
+    char designation[20];
+    long int salary;
+    char j_date[9];
+    char n_node[5];
+    struct emp *left;
+    struct emp *right;
+};
+
+void management_info(struct emp* node);
+void preorderTraversal(struct emp* node);
+struct emp *create();
+int reserve_room();
+void check_in();
+void check_out();
+void room_status();
+void management();
+void room_rates();
+int guest_info();
+void all_info();
+void luggage();
+int push(int);
+int pop(struct room *);
+int become_reception();
+int become_manager();
+
+int graph[MAX_VERTICES][MAX_VERTICES];
+int num, min, max;
+struct room *head = NULL, *temp = NULL, *new_node = NULL;
+char pass[12];
+int r_n = 1;
+int p_room_service[50], prs=0, p_kitchen=0, p_reception=0;
+int no_room_service[50], front = -1, rear = -1;
+int room_price;
+int total_rooms;
+struct emp *e;
+
+
+
+struct emp *create() {
+    struct emp *new;
+    char tname[20];
+    char tdesignation[20];
+    long int tsalary;
+    char tj_date[9];
+    char tn_node[5];
+    new = (struct emp*)malloc(sizeof(struct emp));
+printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    printf("\nNAME OF EMPLOYEE : ");
+    scanf("%s", tname);
+    strcpy(new->name, tname);
+
+    printf("\nDEPARTMENT OF EMPLOYEE : ");
+    scanf("%s", tdesignation);
+    strcpy(new->designation, tdesignation);
+
+    printf("\nSALARY : ");
+    scanf("%ld", &tsalary);
+    new->salary = tsalary;
+
+    printf("\nJOINING DATE : ");
+    scanf("%s", tj_date);
+    strcpy(new->j_date, tj_date);
+
+    printf("\nDO THIS EMPLOYEE HAVE ANY SUB EMPLOYEE: ");
+    scanf("%s", tn_node);
+    strcpy(new->n_node,tn_node);
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+
+    if (strcmp(tn_node,"no") == 0) {
+        new->left = NULL;
+        new->right = NULL;
+        return new;
+    }
+
+    printf("\nENTER THE INFORMATION OF LEFT-SUB-EMPLOYEE OF %s:", new->name);
+    new->left = create();
+    printf("\nENTER THE INFORMATION OF RIGHT-SUB-EMPLOYEE OF %s:", new->name);
+    new->right = create();
+
+    return new;
+}
+
+//graph related program starts from here
+int rad_no() {
+    return min + rand() % (max - min + 1);
+}
+
+int initgraph(int vertices) {
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            graph[i][j] = 0;
+        }
+    }
+    return 0;
+}  
+  
+void add_graph(int start, int end) {
+    graph[start][end] = 1;
+}
+
+void printf_graph(int vertices) {
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            if(graph[i][j] == 1) {
+                printf("%d => %d\n", i, j);
+            }
+        }
+        printf("\n\n");
+    }
+}
+
+int graph_() {
+    int vr;
+
+     // Ask the user to input the number of random numbers to generate
+    printf("Enter the number of random numbers to generate: ");
+    scanf("%d", &num);
+
+    // Ask the user to input the range for random number generation
+    printf("Enter the minimum and maximum values for random number generation: ");
+    scanf("%d %d", &min, &max);
+
+    srand(time(NULL)); // Initialize random number generator
+
+    initgraph(num*2);
+    for(int i = 0; i < (num*num); i++) {
+        add_graph(rad_no(), rad_no());
+    }
+
+    printf("\nprinting graph\n");
+    printf_graph(num);
+
+    return 0;
+}
+
+//graph related program ended here
+
+void management_info(struct emp* node) {
+
+    if (node == NULL) {
+        return;
+    }
+    printf("\nNAME : %s",node->name);
+    printf("\nDEPARTMENT : %s",node->designation);
+    printf("\nSALARY : %ld",node->salary);
+    printf("\nJOINING DATE : %s",node->j_date);
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    
+    management_info(node->left);
+    management_info(node->right);
+}
+
+void preorderTraversal(struct emp* node) {
+    if (node == NULL) {
+        return;
+    }
+    if(strcmp(node->designation,"room_service") == 0)
+    {
+    ++prs;
+    }
+    if(strcmp(node->designation,"kitchen") == 0)
+    {
+    ++p_kitchen;
+    }
+    if(strcmp(node->designation,"reception") == 0)
+    {
+    ++p_reception;
+    }
+    preorderTraversal(node->left);
+    preorderTraversal(node->right);
+}
+
+
+// Function to handle luggage information for a guest
+void luggage() {
+    int luggage_no;
+    printf("\nHOW MANY LUGGAGES DO YOU HAVE ? \n");
+    scanf("%d", &temp->total_luggage);
+    if(temp->total_luggage > maxstack){
+     printf("\nSORRY, BUT WE HAVE CAPACITY OF 10 LUGGAGES ONLY\nSO WE CAN STORE 10 LUGGAGES ONLY");
+     }
+    for(int i = 0; i < temp->total_luggage; i++) {
+    if (temp->top == maxstack - 1) {
+        printf("\nLUGGAGE STORAGE IS FULL");
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        return;
+    }
+        printf("\nENETER YOUR LUGGAGE NUMBER : ");
+        scanf("%d", &luggage_no);
+        push(luggage_no);
+    }
+}
+
+// Function to add luggage to the stack
+int push(int luggage_no) {
+    int l_n = luggage_no;
+    if (temp->top == maxstack - 1) {
+        printf("\nLUGGAGE STORAGE IS FULL");
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        return 0;
+    }
+    temp->top = temp->top + 1;
+    temp->stack[temp->top] = l_n;
+    return 0;
+}
+
+// Function to remove luggage from the stack
+int pop(struct room * temp) {
+    if (temp->top == -1) {
+        return 0;
+    }
+    while (temp->top != -1) {
+        printf("\nLUGGAGE NO %d", temp->stack[temp->top]);
+        temp->top = temp->top - 1;
+    }
+}
+
+// Function to reserve a room for a guest
+int reserve_room() {
+    int flag = 0;
+    temp = head;
+    while (temp != NULL) {
+        if (temp->room_status == 0) {
+         printf("\nENTER GUEST NAME: ");
+         scanf("%s", temp->guest_name);
+
+        printf("\nENTER GUEST'S PHONE NUMBER: ");
+        scanf("%s", temp->phone_no);
+
+        printf("\nHOW LOG THE STAY WILL BE (in days): ");
+        scanf("%d", &temp->stay_time);
+
+          temp->room_status = 1; 
+          temp->top = -1; 
+         break;
+           
+            
+        } else {
+            temp = temp->next;
+        }
+    }
+    if(temp == NULL)
+    {
+      printf("\nSORRY ALL ROOMS ARE ALREADY RESERVED");
+      return 0;}
+
+   
+
+    for(int i = 0; i < prs; i++) {
+        if(p_room_service[i] == 0) {
+            p_room_service[i] = temp->room_no;
+            flag = 1;
+            printf("\nCONGRATULATIONS!!! YOU HAVE RESERVED ROOM WITH ROOM NUMBER %d \nHAVE A GOOD STAY :) \n\n",temp->room_no);
+            printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+   break;
+        }
+    }
+
+    if(flag == 0) {
+        printf("\nSORRY FOR INCONVENIENCE ...!\n\nBUT ALL OUR SERVICES ARE ALREADY ASSIGNED TO OTHER ROOMS..!\n\nONCE ONE OF THEM CHECKS OUT, WE WILL IMMEDIATELY ASSIGN ROOM SERVICE TO YOU :) \n\n");
+       printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        for(int i = 0; i < 50; i++) {
+            if(front == -1 && rear == -1) {
+                front = 0;
+                rear = 0;
+                no_room_service[rear] = temp->room_no;
+                printf("\nCONGRATULATIONS!!! YOU HAVE RESERVED ROOM WITH ROOM NUMBER %d \nHAVE A GOOD STAY :) \n\n",temp->room_no);
+            
+                break;
+            } else if(rear != -1) {
+                ++rear;
+                no_room_service[rear] = temp->room_no;
+                printf("\nCONGRATULATIONS!!! YOU HAVE RESERVED ROOM WITH ROOM NUMBER %d \nHAVE A GOOD STAY :) \n\n",temp->room_no);
+              printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+
+               
+                break;
+            } else if(rear >= 50) {
+                printf("\nSORRY..!\nOUR ALL ROOMS ARE FULL..!");
+       printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+                break;
+            } else {
+                break;
+            }
+        }
+    }
+}
+
+
+// Function to check-in a guest to their reserved room
+void check_in() {
+    int room_no, flag = 0;
+    temp = head;
+    printf("\nENTER YOUR RESERVED ROOM NUMBER: ");
+    scanf("%d", &room_no);
+
+    while (temp != NULL) {
+        if (temp->room_no == room_no && temp->room_status == 1) {
+            printf("\nWE GOT YOUR RESERVED ROOM :) HAVE GOOD STAY :)\n\n");
+      printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+            flag = 1;
+            break;
+        }
+        temp = temp->next;
+    }
+
+    if (flag == 0) {
+        printf("\nSORRY, THERE IS NO ROOM RESERVED FOR YOU :(\n\n");
+      printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    } else{
+    luggage();
+    return;
+   printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    }
+}
+
+// Function to check-out a guest from their room
+void check_out() {
+    int room_no, flag = 0, flag1 = 0;
+   temp = head;
+    printf("\nENTER YOUR ROOM NUMBER: ");
+    scanf("%d", &room_no);
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    while (temp != NULL) {
+        if (temp->room_no == room_no && temp->room_status == 1) {
+            for(int i = 0; i < prs; i++) {
+                if(room_no == p_room_service[i]) {
+                    p_room_service[i] = 0;
+                    flag1 = 1;
+                }
+            }
+
+            if(no_room_service[front] != 0 && front != -1) {
+                for(int j = 0; j < prs; j++) {
+                    if(p_room_service[j] == 0) {
+                        p_room_service[j] = no_room_service[front];
+
+                        printf("\nROOM SERVICE IS ASSIGNED TO ROOM NO: %d ", no_room_service[front]);
+                        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+                        front = front + 1;;
+
+                        break;
+                    }
+                }
+            }
+
+           temp->room_status = 0;
+           
+            flag = 1;
+            
+            break; // Break out of the loop after finding the room
+        }
+        temp = temp->next;
+    }
+    if (flag == 0) {
+        printf("\nTHERE IS NO ROOM WHICH IS RESERVED FOR YOU :(\n\n");
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+   } else {
+      printf("\n\nYOUR BILL IS HERE : %d RS for LIVING %d DAYS\n", room_price*temp->stay_time, temp->stay_time);
+     printf("\nYOUR LUGGAGES ARE HERE \n");
+            for(int i = 0; i < temp->total_luggage; i++) {
+                pop(temp);
+                printf("\n");
+            }
+          
+        printf("\nCHECK-OUT SUCCESSFUL :)\n\n");
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+   }
+    if (flag1 == 0) {
+        printf("\nSORRY FOR INCONVENIENCE RELATED TO ROOM SERVICE :(\nNEXT TIME WE WILL TRY OUR BEST :)");
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    }
+}
+
+// Function to display information about all guests
+void all_info() {
+int flag=0;
+    temp = head;
+        while(temp != NULL) {
+        if(temp->room_status == 1){
+            printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+           printf("\nGUEST'S NAME : %s\n", temp->guest_name);
+            printf("\nSTAYED IN ROOM NO: %d\n", temp->room_no);
+            printf("\nPHONE NUMBER: %s\n", temp->phone_no);
+            printf("\nSTAYED FOR %d DAYS\n\n", temp->stay_time);
+            flag = 1;
+            temp = temp->next;
+            printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+         }else{  
+          temp = temp->next;
+          }
+        }
+        if(flag == 0)
+        {
+         printf("\nNO ANY GUEST IN HOTEL");
+         return;
+         }
+    }
+
+// Function to display the status of a specific room
+void room_status() {
+    int room_no;
+    int flag = 0;
+    printf("\nENTER THE ROOM NUMBER: ");
+    scanf("%d", &room_no);
+        
+    temp = head;
+
+    while (temp != NULL) {
+        
+        if (temp->room_no == room_no) {
+            if (temp->room_status == 0) {
+                printf("\nROOM IS NOT RESERVED :)\n\n");
+                printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+               flag = 1;
+                break;
+            } else if(temp->room_status == 1){
+            printf("\nROOM IS RESERVED");
+            printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+             flag = 1;
+            break;
+            }
+        }else{
+                     temp = temp->next;                printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+           }
+        
+    }
+
+    if (flag == 0) {
+        printf("\nNO %d ROOM IN HOTEL\n\n", room_no);
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+          }
+}
+
+// Function to display management information
+void management() {
+    printf("\nSTAFF DATA\n");
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    printf("\n%d PEOPLE IN RECEPTION\n%d PEOPLE IN KITCHEN\n%d PEOPLE IN ROOM SERVICE\n\n", p_reception, p_kitchen, prs);
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+      management_info(e);
+       printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+}
+
+// Function to display room rates
+void room_rates() {
+    printf("\nFOR EACH DAY:\n%d RS\n\n",room_price);
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+}
+
+// Function to become a manager
+int become_manager() {
+    int choice = 0, flag = 0;
+    char temp_pass[10];
+    int ans;
+    char ch[1];
+    l:
+    printf("\n\nENTER PASSWORD: ");
+    scanf("%s", temp_pass);
+
+    ans = strcmp(temp_pass, pass);
+    if (ans == 0) {
+    printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("\n\t\t\t\t\t---------------------------WELCOME---------------------------\n");
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        while (1) {
+          printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+           printf("\n    MANAGER\n\n");
+            printf("\n 1] ROOM STATUS");
+            printf("\n 2] GUEST INFO");
+            printf("\n 3] MANAGEMENT");        
+            printf("\n 4] ROOM PRICES");
+            printf("\n 5] ALL GUESTS INFORMATION");
+            printf("\n 6] ENTER RECEPTION MODE");
+            printf("\n 7] GRAPH"); 
+            printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+            printf("\n\nENTER YOUR CHOICE: ");
+            scanf("%d", &choice);
+            printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+            switch (choice) {
+                case 1:
+                    printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                    room_status();
+                    break;
+                case 2:
+                    printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                    guest_info();
+                    break;
+                case 3:
+                    printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                    management();
+                    break;            
+                case 4:
+                    printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                    room_rates();
+                    break;
+                case 5:
+                    printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                    all_info();
+                    break;                   
+                case 6:
+                    printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                    become_reception();
+                    break;
+                 case 7:
+                    printf("\033[2J\033[H"); // ANSI escape sequence to clear screen  
+                    graph_();
+                    break;    
+                default:
+                    printf("\nPLEASE SELECT A VALID OPTION\n\n");
+                    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+           }
+        }
+    } else if(strcmp(temp_pass,"EXIT") == 0 || strcmp(temp_pass,"exit") == 0) {
+        return 0;
+    }
+}
+
+// Function to become a receptionist
+int become_reception() {
+    int choice;
+     printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+      printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+   printf("\n\t\t\t\t\t---------------------------WELCOME---------------------------\n");
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    while (1) {
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+       printf("\nRECEPTIONIST\n\n");
+        printf("\n\n 1] ROOM RESERVATION");
+        printf("\n 2] CHECK-IN");
+        printf("\n 3] CHECK-OUT");
+        printf("\n 4] ENTER MANAGER MODE");
+
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        printf("\n\nENTER YOUR CHOICE: ");
+        scanf("%d", &choice);
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        switch (choice) {
+            case 1:
+                printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                reserve_room();
+                break;
+            case 2:
+                printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                check_in();
+                break;
+            case 3:
+                printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                check_out();
+                break;
+            case 4:
+                printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+                become_manager();
+                break;
+            default:
+    
+             printf("\nPLEASE SELECT A VALID OPTION\n\n");
+                printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        }
+    }
+}
+
+// Function to get guest information
+int guest_info() {
+    char guest_n[10];
+    int flag = 0;
+    temp = head->next;
+    if(temp == NULL){
+    goto m;
+    }
+      printf("\nENTER THE GUEST NAME: ");
+    scanf("%s", guest_n);
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    
+    while (1) {
+        if (strcmp(temp->guest_name, guest_n) == 0) {
+            
+            printf("\nSTAYED IN ROOM NO: %d\n", temp->room_no);
+            printf("\nPHONE NUMBER: %s\n", temp->phone_no);
+            printf("\nSTAYED FOR %d DAYS\n\n", temp->stay_time);
+            printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+            flag = 1;
+        } else {
+            if (temp->next != NULL) {
+                temp = temp->next;
+            } else {
+                return 0;
+            }
+        }
+        if (flag == 0) {
+            continue;
+        } else {
+            break;
+        }
+    }
+    if(flag==0)
+    {
+    m:
+    printf("\nNO ANY GUEST IN HOTEL");}
+}
+
+int main() {
+     printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+    int host_choice;
+ 
+    head = (struct room*)malloc(sizeof(struct room));
+    head->next=NULL;
+    head->room_no = r_n;
+    r_n++;
+    head->room_status = 0;
+    temp=head;
+    
+    
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("\n\t\t\t\t\t---------------------------WELCOME---------------------------\n");
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("\n\nMANAGER SHOULD SET PASSWORD FOR AUTHENTICATION PURPOSE\n\n");
+    printf("\nSET PASSWORD: ");
+    scanf("%s", pass);
+     printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+
+    printf("\n\n\t\t\t\t\t\tYOU HAVE TO ENTER THE DATA ABOUT YOUR WORKERS IN HOTEL :)\n\n");
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("\n\n\t\t\t\t\t\t\t\tENTER THE DATA \n\n");
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+   printf("\nENTER THE TOTAL NUMBER OF ROOMS IN HOTEL: ");
+   scanf("%d",&total_rooms);
+   for (int i=1;i<total_rooms;i++)
+   {
+   new_node = (struct room*)malloc(sizeof(struct room));
+   new_node->next = NULL;
+   new_node->room_no = r_n;
+   r_n++;
+   new_node->room_status=0;
+   temp->next = new_node;
+   temp=temp->next;
+   
+   }
+   printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    printf("\n\t\t\t\t\t\t\t\tENTER THE EMPLOYEES'S INFORMATION\n");
+    e = create();
+    preorderTraversal(e);
+    
+    printf("\nSET THE RENT OF ROOM FOR EACH DAY: ");
+    scanf("%d",&room_price);
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("\n\n\t\t\t\t\t\t\t\t\tDATA ENTERED \n\n");
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("\033[2J\033[H"); // ANSI escape sequence to clear screen
+   
+    
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+  
+    printf("\n\t\t\t\t---------------------------WELCOME TO HOTEL MANAGEMENT SYSTEM---------------------------\n");
+    printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    
+
+    while (1) {
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+       printf("\n  1] MANAGER\n\n  2] RECEPTION\n\n");
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        printf("\nENTER YOUR CHOICE: ");
+        scanf("%d", &host_choice);
+        printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+       if (host_choice == 1) {
+            become_manager();
+
+        } else if (host_choice == 2) {
+            become_reception();
+
+        } else {
+            printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+            printf("\n\nINVALID CHOICE :(\n");
+            printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+            continue;
+        }
+    
+
+    
+  }
+  return 0;
+}
